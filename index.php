@@ -31,19 +31,28 @@ if (!isset($_GET['page'])) {
 	}
 }
 
-
-
 session_start();
+if (!isset($_SESSION['accesslevel'])) $_SESSION['accesslevel'] = 1; // set user to viewer
+
+define("EVERYONE", 0);
+define("VIEWER", 1);
+define("ADMIN", 2);
+
 $path = $_SERVER['DOCUMENT_ROOT'];
 $root = __DIR__;
 $modulesPath = __DIR__ . "/modules/";
 $themesPath = "/themes/";
 
+
 $theme = new themeManager($pageID);
 $theme->prepareTheme();
+$theme->includeModule();
 $theme->setMenu(new menu());
 $theme->fillContent();
 $theme->display();
+
+$panel = new Panel();
+echo $panel->getHtml();
 ?>
 <?php
 $time = microtime();

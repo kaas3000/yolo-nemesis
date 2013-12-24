@@ -16,7 +16,7 @@ class User {
 		}
 	}
 
-	public function buildLoginForm($modulesPath) {
+	public function buildUserForm($modulesPath) {
 		echo (file_get_contents($modulesPath . "/login/loginform.html"));
 	}
 
@@ -26,8 +26,8 @@ class User {
 
 	public function register($username, $password) {
 		$pdo = db_setup_connection();
-		$query = $pdo->prepare('INSERT INTO USERS (username, password) VALUES( ? , ? )');
-		$hashedPassword = Login::hashPassword($password);
+		$query = $pdo->prepare('INSERT INTO USER (username, password) VALUES( ? , ? )');
+		$hashedPassword = User::hashPassword($password);
 
 		$query->execute(array($username, $hashedPassword));
 	}
@@ -35,18 +35,18 @@ class User {
 	public function login($username, $password) {
 		$pdo = db_setup_connection();
 		$username = $pdo->quote($username);
-		$passwordHash = Login::hashPassword($password);
+		$passwordHash = User::hashPassword($password);
 
-		$sql = "SELECT * FROM USERS WHERE username = $username";
+		$sql = "SELECT * FROM USER WHERE username = $username";
 		$result = $pdo->query($sql);
 		// Kijk of er iemand bestaat met die username, en check daarna het wachtwoord
-		if ($result->rowCount() > 0) {
+		if ($result) {
 			$row = $result->fetch(PDO::FETCH_ASSOC);
 
 			if ($row['password'] == crypt($password, $row['password'])) {
 				session_start();
 				$_SESSION['username'] = $row['username'];
-				$_SESSION['accesslevel'] = $row['AccessLevel'];
+				$_SESSION['accesslevel'] = (int) $row['AccessLevel'];
 			}
 		}
 	}

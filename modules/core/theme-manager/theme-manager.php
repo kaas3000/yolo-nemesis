@@ -27,9 +27,18 @@ public function setMenu($menu) {
 }
 
 public function prepareTheme() {
-	//$pdo = db_setup_connection();
-	if (file_exists($this->rootLocation . "home.html")) {
-		$this->HTML = file_get_contents($this->rootLocation . "home.html");
+	$pageTheme = "home.html";
+
+	$pdo = db_setup_connection();
+	$sql = "SELECT Theme FROM PAGE WHERE PageID = ?";
+	$query = $pdo->prepare($sql);
+	if ($query->execute(array($this->pageID))) {
+		$result = $query->fetch();
+		$pageTheme = $result['Theme'];
+	}
+
+	if (file_exists($this->rootLocation . $pageTheme)) {
+		$this->HTML = file_get_contents($this->rootLocation . $pageTheme);
 	}
 	
 	// Correct the locations. http:// is unnessecary corrected, that is undone later
@@ -61,25 +70,43 @@ public function fillContent() {
 		$contentID = $IDResult[0];
 		
 		$pdo = db_setup_connection();
-		$query = $pdo->prepare('SELECT * FROM ARTICLE WHERE PageID = ? AND articleID = ?;');
+		$query = $pdo->prepare('SELECT c.Html FROM ARTICLE AS a, CONTENT AS c WHERE a.PageID = ? AND articleID = ? AND a.ContentID = c.ContentID;');
 
 		if ($query->execute(array($this->pageID, $contentID))) {
 			$result = $query->fetch(PDO::FETCH_ASSOC);
 		} else {
-			$result["Content"] = '<p class="content">&nbsp;</p>"';
+			$result["Html"] = '<p class="content">&nbsp;</p>"';
 		}
-
+		
+		// if admin, add div.edit tags
+		if ($_SESSION['accesslevel'] == ADMIN) {
+			$result["Html"] = "<div class=\"edit\" id=\"$contentID\" contenteditable=\"false\">" . $result["Html"] . "</div>";
+		}
+		
 		$pattern = "{content id=$contentID}";
-		$this->HTML = str_replace($pattern, $result["Content"], $this->HTML);
+		$this->HTML = str_replace($pattern, $result["Html"], $this->HTML);
 	}
-	/*
-	 * Search for the first instance of {menu}, and replace
-	 * it with the site menu
-	 */
-
 }
 
-public function getDefaultThemeFolder() {
+public function includeModule() {
+	/*
+	 * If a module-page exists, (db.PAGE not NULL), include it in {content id=1}
+	 */
+	$sql = "SELECT modulePage FROM PAGE WHERE PageID = ?";
+	$pdo = db_setup_connection();
+	$query = $pdo->prepare($sql);
+	$query->execute(array($this->pageID));
+	$result = $query->fetch();
+	
+	if ($result[0] != null) {
+		include_once("pages/" . $result[0] . ".php");
+	}
+}
+
+private function includeAdminPanel() {
+	}
+
+private function getDefaultThemeFolder() {
 	$arrThemes = array();
 	
 	$pdo = db_setup_connection();

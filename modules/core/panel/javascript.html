@@ -1,0 +1,36 @@
+<script type="text/javascript">
+$("<style type='text/css'>\
+	.editing {\
+		border: dashed #FF0000 2px;\
+		min-height: 10px;\
+	}\
+	.editing:hover {\
+	cursor: pointer;\
+		border-style: solid;\
+	} </style>").appendTo("head");
+
+$("<script src='ckeditor/ckeditor.js'> <//script>").appendTo("head");
+
+//property tells CKEditor to not activate every element with contenteditable=true element.
+//CKEDITOR.disableAutoInline = true;
+var clicked = false;
+function editOn() {
+	if (!clicked) {
+		$(".edit").each(function(){
+			$(this).addClass("editing");
+			var editor = CKEDITOR.inline(document.getElementById($(this).attr("id")));
+			$(this).attr("contenteditable", "true");
+		});
+	} else {
+		$(".edit").each(function(){
+			$(this).removeClass("editing");
+			CKEDITOR.instances[$(this).attr("id")].destroy();
+			$(this).attr("contenteditable", "false");
+		});
+	}
+	clicked = !clicked;
+}
+$(".edit").click(function(){
+	$(this).removeClass("editing");
+});
+</script>
