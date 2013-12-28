@@ -1,18 +1,30 @@
 <script type="text/javascript">
 $("<style type='text/css'>\
-	.editing {\
-		border: dashed #FF0000 2px;\
-		min-height: 10px;\
-	}\
-	.editing:hover {\
-	cursor: pointer;\
-		border-style: solid;\
-	} </style>").appendTo("head");
-
-$("<script src='ckeditor/ckeditor.js'> <//script>").appendTo("head");
+        .editing {\
+                border: dashed #FF0000 2px;\
+                min-height: 10px;\
+        }\
+        .editing:hover {\
+        cursor: pointer;\
+                border-style: solid;\
+        } </style>").appendTo("head");
+//$("<script src='ckeditor/ckeditor.js'> <//script>").appendTo("head");
+$('<script src="ckeditor/ckeditor.js"> <\/script>').appendTo("head");
 
 //property tells CKEditor to not activate every element with contenteditable=true element.
 //CKEDITOR.disableAutoInline = true;
+var arrHtml = {};
+console.log("hoei");
+var checkHtmlChange = setInterval(function() {
+	for (var key in arrHtml) {
+			var html = $("#" + key).html();
+			if (arrHtml[key] != html) {
+				var id = key;
+				saveToDatabase(html, id);
+				arrHtml[id] = html;
+			};
+	}
+}, 1000);
 var clicked = false;
 function editOn() {
 	if (!clicked) {
@@ -20,6 +32,9 @@ function editOn() {
 			$(this).addClass("editing");
 			var editor = CKEDITOR.inline(document.getElementById($(this).attr("id")));
 			$(this).attr("contenteditable", "true");
+
+			console.log($(this).attr("id") + " = " + $(this).html());
+			arrHtml[$(this).attr("id")] = $(this).html();
 		});
 	} else {
 		$(".edit").each(function(){
@@ -33,4 +48,43 @@ function editOn() {
 $(".edit").click(function(){
 	$(this).removeClass("editing");
 });
+
+var arrTimers = {};
+$(".edittt").keydown(function(){
+	var id = $(this).attr("id")
+	if (arrTimers[id] != null) clearTimeout(arrTimers[id]);
+	arrTimers[$(this).attr("id")] = setTimeout('saveToDatabase("' + $(this).html() + '", ' + id + ')', 2000);
+	//$(this).html("<strong>Hello world!</strong");
+});
+
+
+var get = getUrlVars();
+function saveToDatabase(html, id) {
+	var xhr = new XMLHttpRequest();
+
+console.log("jaewrj");
+	xhr.onreadystatechange = function() {
+		if (xhr.readystate == 4) {
+			console.log(xhr.responsetext);
+		}
+	}
+
+	var url = "modules/core/theme-manager/update-article.php?html=" + html + "&id=" + id + "&page=" + get['page'];
+	xhr.open("GET", url, true);
+	xhr.send(null);
+}
+
+// Read a page's GET URL variables and return them as an associative array. source: http://snipplr.com/view/799/get-url-variables/
+function getUrlVars() {
+	var vars = [], hash;
+	var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+
+	for(var i = 0; i < hashes.length; i++) {
+		hash = hashes[i].split('=');
+		vars.push(hash[0]);
+		vars[hash[0]] = hash[1];
+	}
+
+	return vars;
+}
 </script>

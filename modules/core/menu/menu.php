@@ -24,11 +24,11 @@ class menu {
 					if ($_SESSION['accesslevel'] == $row['AccessLevel'] || $row['AccessLevel'] == EVERYONE) {
 						$lineWTitle = str_replace("{title}", $row['Name'], $line);
 						$lineWUrl = str_replace("{location}", "index.php?page=" . $row['Name'], $lineWTitle);
-						if ($_GET['id'] = $row['PageID']) {
+						if ($_GET['page'] == $row['Name']) {
 							$lineWActive = str_replace("{ifactive=", "", $lineWUrl);
 							$lineFinal = str_replace("}", "", $lineWActive);
 						} else {
-							$lineFinal = preg_replace("{ifactive=.+}", "", $lineWurl);
+							$lineFinal = preg_replace("{ifactive=+}", "", $lineWUrl);
 						}
 						
 					} else {

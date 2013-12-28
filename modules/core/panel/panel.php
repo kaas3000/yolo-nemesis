@@ -23,7 +23,6 @@ public function prepare($theme) {
 	unset($arrHtml[count($arrHtml) - 1]);
 	
 	for ($i = 0; $i < count($arrHtml); $i++) {
-		$arrHtml[$i] .= ">";
 		if (strstr($arrHtml[$i], "{action}") && strstr($arrHtml[$i], "{title}")) {
 			$pdo = db_setup_connection();
 			$query = "SELECT * FROM PANEL";
@@ -37,7 +36,7 @@ public function prepare($theme) {
 			}
 		}
 
-		$html .= $arrHtml[$i] . "\n";
+		$html .= $arrHtml[$i] . ">\n";
 	}
 
 	$html .= "\n\n" . file_get_contents(__DIR__ . "/javascript.html");

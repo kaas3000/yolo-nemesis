@@ -46,6 +46,7 @@ class User {
 			if ($row['password'] == crypt($password, $row['password'])) {
 				session_start();
 				$_SESSION['username'] = $row['username'];
+				$_SESSION['userid'] = $row['userID'];
 				$_SESSION['accesslevel'] = (int) $row['AccessLevel'];
 			}
 		}
