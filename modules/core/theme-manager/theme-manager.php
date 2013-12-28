@@ -8,7 +8,7 @@ private $themeLocation;
 private $pageID;
 private $menu;
 
-public function __construct($pageID) {
+public function __construct($pageID = -1) {
 	$themesPath = "/themes/";
 	$defaultThemeFolder = $this->getDefaultThemeFolder();
 
@@ -17,7 +17,7 @@ public function __construct($pageID) {
 	$this->pageID = $pageID;
 	$this->HTML = "";
 }
-
+	
 public function setMenu($menu) {
 	if ($this->HTML != "") {
 		$menu->prepareHtml();
@@ -27,14 +27,16 @@ public function setMenu($menu) {
 }
 
 public function prepareTheme() {
-	$pageTheme = "home.html";
+	$pageTheme = "singlepage.html";
 
 	$pdo = db_setup_connection();
 	$sql = "SELECT Theme FROM PAGE WHERE PageID = ?";
 	$query = $pdo->prepare($sql);
 	if ($query->execute(array($this->pageID))) {
 		$result = $query->fetch();
-		$pageTheme = $result['Theme'];
+		if ($result['Theme'] != "") {
+			$pageTheme = $result['Theme'];
+		}
 	}
 
 	if (file_exists($this->rootLocation . $pageTheme)) {
@@ -103,8 +105,13 @@ public function includeModule() {
 	}
 }
 
-private function includeAdminPanel() {
-	}
+public function addToBody($html) {
+	$this->HTML = str_replace("{content id=1}", $html, $this->HTML);
+}
+
+public function addToHead($html) {
+	$this->HTML = str_replace("</head>", "$html\n</head>", $this->HTML);
+}
 
 private function getDefaultThemeFolder() {
 	$arrThemes = array();

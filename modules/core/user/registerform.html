@@ -1,5 +1,7 @@
-<form method="post" action="modules/login/registerform.php">
-    <input type="text" name="username"><br>
-    <input type="password" name="password"><br>
-    <input type="submit" value="login" name="submitted"><br>
+<form method="post" action="/modules/core/user/registerform.php">
+    username: <input type="text" name="username"><br>
+    password: <input type="password" name="password"><br>
+    <input type="hidden" name="accesslevel" value="2">
+    <input type="hidden" name="location">
+    <input type="submit" value="Register" name="submitted"><br>
 </form>

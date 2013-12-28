@@ -26,11 +26,13 @@ var checkHtmlChange = setInterval(function() {
 	}
 }, 1000);
 var clicked = false;
+var editor;
 function editOn() {
 	if (!clicked) {
 		$(".edit").each(function(){
 			$(this).addClass("editing");
 			var editor = CKEDITOR.inline(document.getElementById($(this).attr("id")));
+			
 			$(this).attr("contenteditable", "true");
 
 			console.log($(this).attr("id") + " = " + $(this).html());

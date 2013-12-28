@@ -6,6 +6,8 @@ class menu {
 	public function __CONSTRUCT() {
 		$this->template = __DIR__ . "/menu.html";
 		$this->HTML = file_get_contents(__DIR__ . "/menu.html");
+
+		if (!isset($_GET['page'])) $_GET['page'] = -1;
 	}
 
 	public function prepareHtml() {
@@ -23,7 +25,7 @@ class menu {
 				foreach($pdo->query($query) as $row) {
 					if ($_SESSION['accesslevel'] == $row['AccessLevel'] || $row['AccessLevel'] == EVERYONE) {
 						$lineWTitle = str_replace("{title}", $row['Name'], $line);
-						$lineWUrl = str_replace("{location}", "index.php?page=" . $row['Name'], $lineWTitle);
+						$lineWUrl = str_replace("{location}", "/index.php?page=" . $row['Name'], $lineWTitle);
 						if ($_GET['page'] == $row['Name']) {
 							$lineWActive = str_replace("{ifactive=", "", $lineWUrl);
 							$lineFinal = str_replace("}", "", $lineWActive);

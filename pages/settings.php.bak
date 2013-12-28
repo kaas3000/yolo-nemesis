@@ -1,0 +1,139 @@
+<?php
+require_once("require.php");
+
+function generateThemePages($pageName) {
+	$pdo = db_setup_connection();
+	$sql = "SELECT `folderName` FROM THEME WHERE `default`=1";
+	foreach ($pdo->query($sql) as $row) {
+		$themeFolder = $row['folderName'];
+	}
+	$dir = opendir(__DIR__ . "/../themes/$themeFolder/");
+	echo '<select name="Theme">' . "\n";
+	while ($file = readdir($dir)) {
+		if (strstr($file, ".html")) {
+			if ($file == $pageName) {
+				echo '<option value="' . $file . '" selected>' . $file . "</option>\n";
+			} else {
+				echo '<option value="' . $file . '">' . $file . "</option>\n";
+			}
+		}
+	}
+	echo "</select>";
+}
+
+function accesslevelToName($level) {
+	switch ($level) {
+		case 0:
+			return "everyone";
+			break;
+		case 1:
+			return "viewer";
+			break;
+		case 2:
+			return "admin";
+			break;
+		default:
+			return "everyone";
+	}
+}
+
+$theme = new themeManager();
+$theme->prepareTheme();
+$theme->setMenu(new Menu());
+$theme->fillContent();
+$head = '<style type="text/css">
+			div.users, div.pages {
+				margin-right: 20px;
+			}
+			div.users ul, div.pages ul {
+				list-style-type: none;
+				padding: 0;
+			}
+		</style>
+
+		<script type="text/javascript">
+			function setregister(element) {
+				document.getElementById("registerform").style.display = "inline";
+				document.getElementById("registerformLink").style.display = "none";
+			}
+			
+			function showNewPage() {
+				document.getElementById("newPage").style.display = "inline";
+				document.getElementById("newPageLink").style.display = "none";
+			}
+		</script>';
+$theme->addToHead($head);
+$theme->display();
+?>
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Settings</title>
+		
+		<style type="text/css">
+			div.users, div.pages {
+				margin-right: 20px;
+			}
+			div.users ul, div.pages ul {
+				list-style-type: none;
+				padding: 0;
+			}
+		</style>
+
+		<script type="text/javascript">
+			function setregister(element) {
+				document.getElementById("registerform").style.display = "inline";
+				document.getElementById("registerformLink").style.display = "none";
+			}
+			
+			function showNewPage() {
+				document.getElementById("newPage").style.display = "inline";
+				document.getElementById("newPageLink").style.display = "none";
+			}
+		</script>
+	</head>
+
+	<body>
+		<h1>Settings</h1>
+
+		<div class="users">
+			<h2>users</h2>
+				<ul>
+					<?php
+					$pdo = db_setup_connection();
+					foreach($pdo->query("SELECT userID, username FROM USER;") as $row) {
+						echo "<li>" . $row['username'] . " <a href=\"/modules/core/user/registerform.php?remove=" . $row['userID'] . "\">[remove]</a></li>\n";
+					}
+					echo "<li><a id=\"registerformLink\" href=\"javascript:setregister()\">New user</a></li>";
+					echo '<li id="registerform" style="display: none;">' . str_replace('<input type="hidden" name="location">', '<input type="hidden" name="location" value="/pages/settings.php">', file_get_contents("../modules/core/user/registerform.html")) . "</li>";
+					?>
+				
+				</ul>
+		</div>
+		<div class="pages">
+			<h2>pages</h2>
+			<table>
+				<?php
+					$sql = "SELECT * FROM PAGE";
+					foreach($pdo->query($sql) as $row) {
+						echo '<form method="post" action="removepage.php"><tr>' . "\n\n";
+						echo '<input type="hidden" name="id" value="' . $row['PageID'] . '">';
+						echo '<td><input type="text" name="Name" value="' . $row['Name'] . '">' . "</td>\n\n";
+						echo '<td><input type="text" name="AccessLevel" value="' . accesslevelToName($row['AccessLevel']) . '">' . "</td>\n\n";
+						echo "<td>";
+						generateThemePages($row['Theme']);
+						echo "</td>";
+						echo '<td><input type="submit" name="update" value="update"></td>';
+						echo '<td><input type="submit" name="remove" value="remove"></td>';
+						echo '</tr></form>';
+					}
+				?>
+			</table>
+			<a id="newPageLink" href="javascript:showNewPage(this)">New page</a>
+			<div id="newPage" style="display: none;">
+				<?php	$action = "/modules/core/pages/pages.php";
+					include(__DIR__ . "/../modules/core/pages/default.php"); ?>
+			</div>
+		</div>
+	</body>
+</html>

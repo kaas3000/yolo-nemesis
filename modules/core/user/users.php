@@ -32,6 +32,11 @@ class User {
 		$query->execute(array($username, $hashedPassword));
 	}
 
+	public function remove($id) {
+		$pdo = db_setup_connection();
+		$pdo->query('DELETE FROM USER WHERE userID = '. $id);
+	}
+
 	public function login($username, $password) {
 		$pdo = db_setup_connection();
 		$username = $pdo->quote($username);
